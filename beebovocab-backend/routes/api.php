@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\VocabulariesController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -24,4 +25,8 @@ Route::group(['prefix' => 'auth'], function ($router) {
     Route::post('logout', [AuthController::class, 'destroy']);
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::get('user', [AuthController::class, 'index']);
+
+    //
+    Route::post('create-vocabularies', [VocabulariesController::class,'create']);
 });
+
