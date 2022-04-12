@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\VocabulariesController;
+use App\Http\Controllers\VocabularySetController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -28,5 +29,9 @@ Route::group(['prefix' => 'auth'], function ($router) {
 
     //
     Route::post('create-vocabularies', [VocabulariesController::class,'create']);
+    Route::get('vocabulary_sets', [VocabularySetController::class,'index']);
+    Route::post('update-vocabulary_sets', [VocabularySetController::class,'update']);
+    Route::post('create-vocabulary_sets', [VocabularySetController::class,'store']);
+    Route::post('delete-vocabulary_sets', [VocabularySetController::class,'destroy']);
 });
 
