@@ -4,32 +4,60 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+
 
 class VocabularySetController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
-        $field = [
-            'vocabulary_sets.title',
-            'vocabulary_sets.description',
-            'vocabulary_sets.avatar_image',
-            'vocabulary_sets.created_user_id',
-        ];
-        $vocabulary = DB::table('vocabulary_sets')->get($field);
+        $user_id = $request->input('created_user_id');
+        if (is_null($user_id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Người dùng không tồn tại'
+            ], 200);
+        }
+        $vocabulary = DB::table('vocabulary_sets')->where('created_user_id', $user_id)->simplePaginate(15);
         if (empty($vocabulary)) {
             return response()->json([
                 'success' => true,
-                'messeage' => 'Không có dữ liệu'
+                'message' => 'Không có dữ liệu'
             ], 200);
         }
         return response()->json([
             'success' => true,
+            'message' => 'Thành công!!!',
+            'data' => [
+                'vocabulary' => $vocabulary,
+            ],
+        ], 200);
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function showDefaultVocab(Request $request)
+    {
+        $user_ids = DB::table('users')->where('role', 'admin')->get()->pluck('id');
+        $vocabulary = DB::table('vocabulary_sets')->whereIn('created_user_id', $user_ids)->simplePaginate(15);
+
+        if (empty($vocabulary)) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Không có dữ liệu'
+            ], 200);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Thành công',
             'data' => [
                 'vocabulary' => $vocabulary,
             ],
@@ -63,7 +91,7 @@ class VocabularySetController extends Controller
             ], 200);
         }
         $request->validate([
-            'title' => 'required|unique:vocabulary_sets|max:191',
+            'title' => 'required|max:191',
             'description' => 'required|max:255',
             'avatar_image' => 'required|max:255',
             'created_user_id' => 'required|max:255',

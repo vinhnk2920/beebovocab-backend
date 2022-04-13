@@ -34,6 +34,7 @@ Route::group(['prefix' => 'vocabs'], function ($router) {
 
 Route::group(['prefix' => 'vocabulary_sets'], function ($router) {
     Route::get('/', [VocabularySetController::class,'index']);
+    Route::get('/default', [VocabularySetController::class,'showDefaultVocab']);
     Route::post('update', [VocabularySetController::class,'update']);
     Route::post('create', [VocabularySetController::class,'store']);
     Route::post('delete', [VocabularySetController::class,'destroy']);
