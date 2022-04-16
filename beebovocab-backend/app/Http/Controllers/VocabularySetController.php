@@ -26,7 +26,7 @@ class VocabularySetController extends Controller
         $vocabulary = DB::table('vocabulary_sets')->where('created_user_id', $user_id)->simplePaginate(15);
         if (empty($vocabulary)) {
             return response()->json([
-                'success' => true,
+                'success' => false,
                 'message' => 'Không có dữ liệu'
             ], 200);
         }
@@ -44,7 +44,7 @@ class VocabularySetController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function showDefaultVocab(Request $request)
+    public function showDefaultSet(Request $request)
     {
         $user_ids = DB::table('users')->where('role', 'admin')->get()->pluck('id');
         $vocabulary = DB::table('vocabulary_sets')->whereIn('created_user_id', $user_ids)->simplePaginate(15);
@@ -65,15 +65,29 @@ class VocabularySetController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function create()
+    public function showSet($id)
     {
-        //
-
+        $vocabulary = DB::table('vocabulary_sets')->where('id', $id)->get()->toArray();
+        if (empty($vocabulary)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không có dữ liệu'
+            ], 200);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Thành công',
+            'data' => [
+                'vocabulary' => $vocabulary,
+            ],
+        ], 200);
     }
+
+
 
     /**
      * Store a newly created resource in storage.
@@ -83,13 +97,6 @@ class VocabularySetController extends Controller
      */
     public function store(Request $request)
     {
-        //
-        if (empty($request)) {
-            return response()->json([
-                'success' => true,
-                'messeage' => 'Không có dữ liệu'
-            ], 200);
-        }
         $request->validate([
             'title' => 'required|max:191',
             'description' => 'required|max:255',
@@ -104,7 +111,7 @@ class VocabularySetController extends Controller
         ]);
         if (empty($vocabulary_set_id)) {
             return response()->json([
-                'success' => true,
+                'success' => false,
                 'message' => 'Đã có lỗi xảy ra, thất bại'
             ], 200);
         }
@@ -124,17 +131,24 @@ class VocabularySetController extends Controller
     public function update(Request $request)
     {
         //
-        $id = $request->get('vocabulary_sets_id');
-        $isUpdate = DB::table('vocabulary_sets_id')->where('id',$id)->update($request->all());
+        $id = $request->get('id');
+        if(is_null($id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tồn tại bộ từ cần sửa!'
+            ], 200);
+        }
+
+        $isUpdate = DB::table('vocabulary_sets')->where('id',$id)->update($request->all());
         if($isUpdate){
             return response()->json([
                 'success' => true,
-                'message' => 'Cập nhật hành công'
+                'message' => 'Cập nhật hành công!'
             ], 200);
         }
         return response()->json([
-            'success' => true,
-            'message' => 'Không thành công'
+            'success' => false,
+            'message' => 'Cập nhật thất bại!'
         ], 200);
     }
 
