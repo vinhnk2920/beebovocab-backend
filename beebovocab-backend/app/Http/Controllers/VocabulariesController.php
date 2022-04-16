@@ -17,6 +17,26 @@ class VocabulariesController extends Controller
     public function index()
     {
         //
+        $field = [
+            'vocabularies.word',
+            'vocabularies.definition',
+            'vocabularies.word_lang',
+            'vocabularies.def_lang',
+            'vocabularies.definition_image'
+        ];
+        $vocabularies = DB::table('vocabularies')->get($field);
+        if (empty($vocabularies)) {
+            return response()->json([
+                'success' => true,
+                'messeage' => 'Không có dữ liệu'
+            ], 200);
+        }
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'vocabularies' => $vocabularies,
+            ],
+        ], 200);
     }
 
     /**
@@ -96,6 +116,18 @@ class VocabulariesController extends Controller
     public function update(Request $request, $id)
     {
         //
+        $id = $request->get('vocabularies_id');
+        $isUpdate = DB::table('vocabularies')->where('id',$id)->update($request->all());
+        if($isUpdate){
+            return response()->json([
+                'success' => true,
+                'message' => 'Cập nhật hành công'
+            ], 200);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Không thành công'
+        ], 200);
     }
 
     /**
@@ -104,8 +136,21 @@ class VocabulariesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request)
     {
         //
+        $vocabularies_id = $request->get('vocabularies_id');
+        if (empty($vocabularies_id)) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Không tìm thấy từ'
+            ], 200);
+        }
+        if (DB::table('vocabularies')->where('id', $vocabularies_id)->delete()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Xóa thành công'
+            ], 200);
+        }
     }
 }

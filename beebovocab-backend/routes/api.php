@@ -28,7 +28,11 @@ Route::group(['prefix' => 'auth'], function ($router) {
     Route::get('user', [AuthController::class, 'index']);
 
     //
+    Route::post('vocabularies', [VocabularySetController::class,'index']);
     Route::post('create-vocabularies', [VocabulariesController::class,'create']);
+    Route::post('update-vocabularies', [VocabularySetController::class,'update']);
+    Route::post('delete-vocabularies', [VocabularySetController::class,'destroy']);
+    //
     Route::get('vocabulary_sets', [VocabularySetController::class,'index']);
     Route::post('update-vocabulary_sets', [VocabularySetController::class,'update']);
     Route::post('create-vocabulary_sets', [VocabularySetController::class,'store']);
