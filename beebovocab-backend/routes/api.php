@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\VocabulariesController;
 use App\Http\Controllers\VocabularySetController;
+use App\Http\Controllers\DefaultTopicsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -28,14 +29,19 @@ Route::group(['prefix' => 'auth'], function ($router) {
     Route::get('user', [AuthController::class, 'index']);
 
     //
-    Route::post('vocabularies', [VocabularySetController::class,'index']);
+    Route::post('vocabularies', [VocabulariesController::class,'index']);
     Route::post('create-vocabularies', [VocabulariesController::class,'create']);
-    Route::post('update-vocabularies', [VocabularySetController::class,'update']);
-    Route::post('delete-vocabularies', [VocabularySetController::class,'destroy']);
+    Route::post('update-vocabularies', [VocabulariesController::class,'update']);
+    Route::post('delete-vocabularies', [VocabulariesController::class,'destroy']);
     //
     Route::get('vocabulary_sets', [VocabularySetController::class,'index']);
     Route::post('update-vocabulary_sets', [VocabularySetController::class,'update']);
     Route::post('create-vocabulary_sets', [VocabularySetController::class,'store']);
     Route::post('delete-vocabulary_sets', [VocabularySetController::class,'destroy']);
+    //
+    Route::get('default_topics_id', [DefaultTopicsController::class,'index']);
+    Route::post('update-default_topics_id', [DefaultTopicsController::class,'update']);
+    Route::post('create-default_topics_id', [DefaultTopicsController::class,'store']);
+    Route::post('delete-default_topics_id', [DefaultTopicsController::class,'destroy']);
 });
 
