@@ -4,6 +4,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\VocabulariesController;
 use App\Http\Controllers\VocabularySetController;
 use App\Http\Controllers\DefaultTopicsController;
+use App\Http\Controllers\LearningResultsController;
+use App\Http\Controllers\RelatedQuestionsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -43,5 +45,15 @@ Route::group(['prefix' => 'auth'], function ($router) {
     Route::post('update-default_topics_id', [DefaultTopicsController::class,'update']);
     Route::post('create-default_topics_id', [DefaultTopicsController::class,'store']);
     Route::post('delete-default_topics_id', [DefaultTopicsController::class,'destroy']);
+    //
+    Route::get('learning_results', [LearningResultsController::class,'index']);
+    Route::post('update-learning_results', [LearningResultsController::class,'update']);
+    Route::post('create-learning_results', [LearningResultsController::class,'store']);
+    Route::post('delete-learning_results', [LearningResultsController::class,'destroy']);
+    //
+    Route::get('related_questions', [RelatedQuestionsController::class,'index']);
+    Route::post('update-related_questions', [RelatedQuestionsController::class,'update']);
+    Route::post('create-related_questions', [RelatedQuestionsController::class,'store']);
+    Route::post('delete-related_questions', [RelatedQuestionsController::class,'destroy']);
 });
 

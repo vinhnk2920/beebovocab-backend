@@ -1,13 +1,11 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Http\Controllers\Controller;
-use Exception;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 
-class VocabulariesController extends Controller
+class LearningResultsController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -18,14 +16,12 @@ class VocabulariesController extends Controller
     {
         //
         $field = [
-            'vocabularies.word',
-            'vocabularies.definition',
-            'vocabularies.word_lang',
-            'vocabularies.def_lang',
-            'vocabularies.definition_image'
+            'related_questions.vocabulary_id',
+            'related_questions.user_id',
+            'related_questions.f_rate',
         ];
-        $vocabularies = DB::table('vocabularies')->get($field);
-        if (empty($vocabularies)) {
+        $related_questions = DB::table('related_questions')->get($field);
+        if (empty($related_questions)) {
             return response()->json([
                 'success' => true,
                 'messeage' => 'Không có dữ liệu'
@@ -34,7 +30,7 @@ class VocabulariesController extends Controller
         return response()->json([
             'success' => true,
             'data' => [
-                'vocabularies' => $vocabularies,
+                'vocabulary' => $related_questions,
             ],
         ], 200);
     }
@@ -44,30 +40,9 @@ class VocabulariesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create(Request $request)
+    public function create()
     {
         //
-        $listWords = $request->added_vocabularies;
-        foreach ($listWords as $Word){
-            $vocabularies_id = DB::table('vocabularies')->insertGetId([
-                'word' => $Word['key'],
-                'definition' => $Word['definition'],
-                'word_lang' => $Word['word_lang'],
-                'def_lang' => $Word['def_lang'],
-                'definition_image' => $Word['definition_image']
-            ]);
-         }
-
-        if (empty($vocabularies_id)) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Đã có lỗi xảy ra, thất bại'
-            ], 200);
-        }
-        return response()->json([
-            'success' => true,
-            'message' => 'Thành công'
-        ], 200);
     }
 
     /**
@@ -79,6 +54,27 @@ class VocabulariesController extends Controller
     public function store(Request $request)
     {
         //
+        if (empty($request)) {
+            return response()->json([
+                'success' => true,
+                'messeage' => 'Không có dữ liệu'
+            ], 200);
+        }
+        $learning_results_id = DB::table('related_questions')->insertGetId([
+            'vocabulary_id' => $request->get('title'),
+            'user_id' => $request->get('description'),
+            'f_rate' => $request->get('avatar_image'),
+        ]);
+        if (empty($learning_results_id)) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Đã có lỗi xảy ra, thất bại'
+            ], 200);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Thành công'
+        ], 200);
     }
 
     /**
@@ -113,8 +109,8 @@ class VocabulariesController extends Controller
     public function update(Request $request, $id)
     {
         //
-        $id = $request->get('vocabularies_id');
-        $isUpdate = DB::table('vocabularies')->where('id',$id)->update($request->all());
+        $id = $request->get('learning_results_id');
+        $isUpdate = DB::table('learning_results')->where('id',$id)->update($request->all());
         if($isUpdate){
             return response()->json([
                 'success' => true,
@@ -136,14 +132,14 @@ class VocabulariesController extends Controller
     public function destroy(Request $request)
     {
         //
-        $vocabularies_id = $request->get('vocabularies_id');
-        if (empty($vocabularies_id)) {
+        $learning_results_id = $request->get('learning_results_id');
+        if (empty($learning_results_id)) {
             return response()->json([
                 'success' => true,
                 'message' => 'Không tìm thấy từ'
             ], 200);
         }
-        if (DB::table('vocabularies')->where('id', $vocabularies_id)->delete()) {
+        if (DB::table('learning_results')->where('id', $learning_results_id)->delete()) {
             return response()->json([
                 'success' => true,
                 'message' => 'Xóa thành công'
