@@ -46,37 +46,36 @@ class VocabulariesController extends Controller
      */
     public function create(Request $request)
     {
-        //
         $request->validate([
-            'word' => 'required|max:191',
-            'definition' => 'required|max:255',
-            'word_lang' => 'required|max:255',
-            'def_lang' => 'required|max:255',
-            'definition_image' => 'required|max:255',
+            'added_vocabularies' => 'required',
+            "def_lang" => 'required',
+            "word_lang" => 'required',
             'vocabulary_set_id' => 'required',
             'created_user_id' => 'required|max:255',
         ]);
-
-        $vocabularies_id = DB::table('vocabularies')->insertGetId([
-            'word' => $request->get('word'),
-            'definition' => $request->get('definition'),
-            'word_lang' => $request->get('word_lang'),
-            'def_lang' => $request->get('def_lang'),
-            'definition_image' => $request->get('definition_image'),
-            'vocabulary_set_id' => $request->get('vocabulary_set_id'),
-            'created_user_id' => $request->get('created_user_id')
-        ]);
+        $listWords = $request->input('added_vocabularies');
+        foreach ($listWords as $word){
+            $vocabularies_id = DB::table('vocabularies')->insertGetId([
+                'word' => $word['word'],
+                'definition' => $word['definition'],
+                'definition_image' => $word['definition_image'],
+                "def_lang" => $request->input('def_lang'),
+                "word_lang" => $request->input('word_lang'),
+                'vocabulary_set_id' => $request->input('vocabulary_set_id'),
+                'created_user_id' => $request->input('created_user_id'),
+            ]);
+        }
 
         if (empty($vocabularies_id)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Đã có lỗi xảy ra, thất bại!'
-            ], 200);
+            ]);
         }
         return response()->json([
             'success' => true,
             'message' => 'Thêm từ vựng thành công!'
-        ], 200);
+        ]);
     }
 
     /**

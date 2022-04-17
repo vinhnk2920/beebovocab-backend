@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DefaultTopicsController;
 use App\Http\Controllers\VocabulariesController;
 use App\Http\Controllers\VocabularySetController;
 use Illuminate\Http\Request;
@@ -35,9 +36,17 @@ Route::group(['prefix' => 'vocabs'], function ($router) {
     Route::post('/delete', [VocabulariesController::class, 'delete']);
 });
 
+Route::group(['prefix' => 'topics'], function ($router) {
+    Route::get('/', [DefaultTopicsController::class, 'index']);
+    Route::post('/create', [DefaultTopicsController::class, 'store']);
+    Route::post('/update', [DefaultTopicsController::class, 'update']);
+    Route::post('/delete', [DefaultTopicsController::class, 'delete']);
+});
+
 Route::group(['prefix' => 'vocabulary_sets'], function ($router) {
     Route::get('/', [VocabularySetController::class,'index']);
     Route::get('/default', [VocabularySetController::class,'showDefaultSet']);
+    Route::get('/findByTopicId/{topic_id}', [VocabularySetController::class,'findByTopicId']);
     Route::get('/{id}', [VocabularySetController::class,'showSet']);
     Route::post('update', [VocabularySetController::class,'update']);
     Route::post('create', [VocabularySetController::class,'store']);

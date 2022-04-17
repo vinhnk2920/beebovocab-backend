@@ -21,14 +21,14 @@ class VocabularySetController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Người dùng không tồn tại'
-            ], 200);
+            ]);
         }
         $vocabulary = DB::table('vocabulary_sets')->where('created_user_id', $user_id)->simplePaginate(15);
         if (empty($vocabulary)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Không có dữ liệu'
-            ], 200);
+            ]);
         }
         return response()->json([
             'success' => true,
@@ -36,7 +36,7 @@ class VocabularySetController extends Controller
             'data' => [
                 'vocabulary' => $vocabulary,
             ],
-        ], 200);
+        ]);
     }
 
     /**
@@ -53,7 +53,7 @@ class VocabularySetController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Không có dữ liệu'
-            ], 200);
+            ]);
         }
         return response()->json([
             'success' => true,
@@ -61,7 +61,7 @@ class VocabularySetController extends Controller
             'data' => [
                 'vocabulary' => $vocabulary,
             ],
-        ], 200);
+        ]);
     }
 
     /**
@@ -76,7 +76,7 @@ class VocabularySetController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Không có dữ liệu'
-            ], 200);
+            ]);
         }
         return response()->json([
             'success' => true,
@@ -84,9 +84,38 @@ class VocabularySetController extends Controller
             'data' => [
                 'vocabulary' => $vocabulary,
             ],
-        ], 200);
+        ]);
     }
 
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function findByTopicId($topic_id)
+    {
+        if(empty($topic_id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bạn phải nhập id của chủ đề!'
+            ]);
+        }
+
+        $vocabularySet = DB::table('vocabulary_sets')->where('topic_id', $topic_id)->simplePaginate(15);
+        if (empty($vocabularySet)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không có bộ từ thỏa mãn!'
+            ]);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Thành công!',
+            'data' => [
+                'vocabulary_sets' => $vocabularySet,
+            ],
+        ]);
+    }
 
 
     /**
@@ -108,17 +137,18 @@ class VocabularySetController extends Controller
             'description' => $request->get('description'),
             'avatar_image' => $request->get('avatar_image'),
             'created_user_id' => $request->get('created_user_id'),
+            'topic_id' => $request->get('topic_id', null),
         ]);
         if (empty($vocabulary_set_id)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Đã có lỗi xảy ra, thất bại'
-            ], 200);
+            ]);
         }
         return response()->json([
             'success' => true,
             'message' => 'Tạo bộ từ thành công'
-        ], 200);
+        ]);
     }
 
     /**
@@ -144,12 +174,12 @@ class VocabularySetController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Cập nhật hành công!'
-            ], 200);
+            ]);
         }
         return response()->json([
             'success' => false,
             'message' => 'Cập nhật thất bại!'
-        ], 200);
+        ]);
     }
 
     /**
@@ -166,13 +196,13 @@ class VocabularySetController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Không tìm thấy bộ từ'
-            ], 200);
+            ]);
         }
         if (DB::table('vocabulary_sets')->where('id', $vocabulary_sets_id)->delete()) {
             return response()->json([
                 'success' => true,
                 'message' => 'Xóa bộ từ thành công'
-            ], 200);
+            ]);
         }
     }
 }
