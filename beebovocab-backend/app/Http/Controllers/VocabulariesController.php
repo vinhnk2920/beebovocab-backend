@@ -12,19 +12,15 @@ class VocabulariesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index($set_id)
     {
-        //
-        $field = [
-            'vocabularies.word',
-            'vocabularies.definition',
-            'vocabularies.word_lang',
-            'vocabularies.def_lang',
-            'vocabularies.definition_image',
-            'vocabularies.vocabulary_set_id',
-            'vocabularies.created_user_id',
-        ];
-        $vocabularies = DB::table('vocabularies')->get($field);
+        if(empty($set_id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bạn phải nhập id của bộ từ!'
+            ]);
+        }
+        $vocabularies = DB::table('vocabularies')->where('vocabulary_set_id', $set_id)->get();
         if (empty($vocabularies)) {
             return response()->json([
                 'success' => true,

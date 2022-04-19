@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DefaultTopicsController;
+use App\Http\Controllers\RelatedQuestionsController;
 use App\Http\Controllers\VocabulariesController;
 use App\Http\Controllers\VocabularySetController;
 use Illuminate\Http\Request;
@@ -30,7 +31,7 @@ Route::group(['prefix' => 'auth'], function ($router) {
 });
 
 Route::group(['prefix' => 'vocabs'], function ($router) {
-    Route::get('/', [VocabulariesController::class, 'index']);
+    Route::get('/{set_id}', [VocabulariesController::class, 'index']);
     Route::post('/create', [VocabulariesController::class, 'create']);
     Route::post('/update', [VocabulariesController::class, 'update']);
     Route::post('/delete', [VocabulariesController::class, 'delete']);
@@ -41,6 +42,10 @@ Route::group(['prefix' => 'topics'], function ($router) {
     Route::post('/create', [DefaultTopicsController::class, 'store']);
     Route::post('/update', [DefaultTopicsController::class, 'update']);
     Route::post('/delete', [DefaultTopicsController::class, 'delete']);
+});
+
+Route::group(['prefix' => 'related_questions'], function ($router) {
+    Route::post('/create', [RelatedQuestionsController::class], 'store');
 });
 
 Route::group(['prefix' => 'vocabulary_sets'], function ($router) {
