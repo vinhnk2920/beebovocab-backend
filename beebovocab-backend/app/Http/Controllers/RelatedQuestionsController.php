@@ -17,12 +17,11 @@ class RelatedQuestionsController extends Controller
     {
         //
         $field = [
-            'related_questions.id',
-            'related_questions.question',
-            'related_questions.vocabulary_id',
-            'related_questions.created_user_id',
+            'related_question.id',
+            'related_question.question',
+            'related_question.vocabulary_id',
         ];
-        $related_questions = DB::table('related_questions')->get($field);
+        $related_questions = DB::table('related_question')->get($field);
         if (empty($related_questions)) {
             return response()->json([
                 'success' => true,
@@ -52,12 +51,28 @@ class RelatedQuestionsController extends Controller
             ]);
         }
         $request->validate([
-            'question' => 'required|max:255',
+            'question' => 'required',
             'vocabulary_id' => 'required',
             'created_user_id' => 'required',
         ]);
 
-        $related_questions_id = DB::table('related_questions')->insertGetId([
+        $vocabularySet = DB::table('users')->where('id', $request->get('created_user_id'))->get()->toArray();
+        if (empty($vocabularySet)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Người tạo không thỏa mãn!'
+            ]);
+        }
+
+        $vocabulary = DB::table('vocabularies')->where('id', $request->get('vocabulary_id'))->get()->toArray();
+        if (empty($vocabulary)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không có từ vựng thỏa mãn!'
+            ]);
+        }
+
+        $related_questions_id = DB::table('related_question')->insertGetId([
             'question' => $request->get('question'),
             'vocabulary_id' => $request->get('vocabulary_id'),
             'created_user_id' => $request->get('created_user_id'),
@@ -73,28 +88,6 @@ class RelatedQuestionsController extends Controller
             'success' => true,
             'message' => 'Tạo câu hỏi thành công!'
         ]);
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return Response
-     */
-    public function edit($id)
-    {
-        //
     }
 
     /**

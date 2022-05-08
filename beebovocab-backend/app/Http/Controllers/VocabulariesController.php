@@ -20,17 +20,23 @@ class VocabulariesController extends Controller
                 'message' => 'Bạn phải nhập id của bộ từ!'
             ]);
         }
-        $vocabularies = DB::table('vocabularies')->where('vocabulary_set_id', $set_id)->get();
+        $vocabularies = DB::table('vocabularies')->where('vocabulary_set_id', $set_id)->join('related_question', 'vocabularies.id', '=', 'related_question.vocabulary_id')->select('vocabularies.*', 'related_question.question')->get();
         if (empty($vocabularies)) {
             return response()->json([
-                'success' => true,
+                'success' => false,
                 'messeage' => 'Không có dữ liệu'
-            ], 200);
+            ]);
+        }
+        $newVocabList = [];
+        foreach ($vocabularies->toArray() as $vocab) {
+            $dot = str_repeat('_ ', strlen($vocab->word));
+            $vocab->test = str_replace($vocab->word, $dot, $vocab->question);
+            array_push($newVocabList, $vocab);
         }
         return response()->json([
             'success' => true,
             'data' => [
-                'vocabularies' => $vocabularies,
+                'vocabularies' => $newVocabList
             ],
         ], 200);
     }
@@ -56,6 +62,8 @@ class VocabulariesController extends Controller
                 'definition' => $word['definition'],
                 'definition_image' => $word['definition_image'],
                 "def_lang" => $request->input('def_lang'),
+                "phonetic" => $word['phonetic'],
+                "audio" => $word['audio'],
                 "word_lang" => $request->input('word_lang'),
                 'vocabulary_set_id' => $request->input('vocabulary_set_id'),
                 'created_user_id' => $request->input('created_user_id'),
@@ -130,6 +138,83 @@ class VocabulariesController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Xóa từ vựng thành công!'
+            ]);
+        }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function review(Request $request)
+    {
+        $request->validate([
+            'vocab_id' => 'required',
+            'answer' => 'required',
+            'user_id' => 'required',
+        ]);
+
+        $vocab_id = $request->get('vocab_id');
+
+        if (is_null($vocab_id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bạn cần nhập vào từ vựng!'
+            ]);
+        }
+
+        $result =  DB::table('learning_results')->where('vocabulary_id',$vocab_id)->get()->toArray();
+        if (empty($result)) {
+            $addedResult = DB::table('learning_results')->insertGetId([
+                'vocabulary_id' => $request->get('vocab_id'),
+                'user_id' => $request->get('user_id'),
+                'f_rate' => '1111',
+                'level' => '1',
+            ]);
+            if (empty($addedResult)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Đã có lỗi xảy ra, thất bại'
+                ]);
+            }
+            return response()->json([
+                'success' => true,
+                'message' => 'Ôn tập thành công!'
+            ]);
+        } else {
+            $f_measure = DB::table('learning_results')->where('vocabulary_id',$vocab_id)->select('f_rate')->get()->toArray();
+            $added_rate = $request->get('answer') . $f_measure[0]->f_rate;
+            if ($added_rate[3] or $added_rate[4]) {
+                $new_rate = substr($added_rate, 0, 3). "1";
+            } else {
+                $new_rate = substr($added_rate, 0, 3). "0";
+            }
+            $f_rate = 3*$new_rate[0] + 2*$new_rate[1] + $new_rate[2] + $new_rate[3];
+            if ($f_rate == 8) {
+                $level = "1";
+            } else if (5 <= $f_rate and $f_rate < 8) {
+                $level = "2";
+            } else if (3 <= $f_rate and $f_rate <= 4) {
+                $level = "3";
+            } else if (1 <= $f_rate and $f_rate <= 2) {
+                $level = "4";
+            } else if ($f_rate == 0 ) {
+                $level = "5";
+            }
+            $now = date('Y-m-d H:i:s');
+            $isUpdate = DB::table('learning_results')->where('vocabulary_id',$vocab_id)->update(['f_rate' => $new_rate, 'level' => $level, 'updated_at' => $now]);
+            if($isUpdate){
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Cập nhật hành công'
+                ], 200);
+            }
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thành công'
             ]);
         }
     }

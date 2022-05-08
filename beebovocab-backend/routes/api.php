@@ -2,7 +2,10 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DefaultTopicsController;
+use App\Http\Controllers\FriendController;
 use App\Http\Controllers\RelatedQuestionsController;
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\VocabulariesController;
 use App\Http\Controllers\VocabularySetController;
 use Illuminate\Http\Request;
@@ -35,17 +38,20 @@ Route::group(['prefix' => 'vocabs'], function ($router) {
     Route::post('/create', [VocabulariesController::class, 'create']);
     Route::post('/update', [VocabulariesController::class, 'update']);
     Route::post('/delete', [VocabulariesController::class, 'delete']);
+    Route::post('/review', [VocabulariesController::class, 'review']);
 });
 
 Route::group(['prefix' => 'topics'], function ($router) {
     Route::get('/', [DefaultTopicsController::class, 'index']);
+    Route::get('/{id}', [DefaultTopicsController::class, 'showTopicById']);
     Route::post('/create', [DefaultTopicsController::class, 'store']);
     Route::post('/update', [DefaultTopicsController::class, 'update']);
     Route::post('/delete', [DefaultTopicsController::class, 'delete']);
 });
 
 Route::group(['prefix' => 'related_questions'], function ($router) {
-    Route::post('/create', [RelatedQuestionsController::class], 'store');
+    Route::get('/', [RelatedQuestionsController::class, 'index']);
+    Route::post('/create', [RelatedQuestionsController::class, 'store']);
 });
 
 Route::group(['prefix' => 'vocabulary_sets'], function ($router) {
@@ -58,3 +64,22 @@ Route::group(['prefix' => 'vocabulary_sets'], function ($router) {
     Route::post('delete', [VocabularySetController::class,'destroy']);
 });
 
+Route::group(['prefix' => 'review'], function ($router) {
+    Route::get('/count-level', [ReviewController::class,'countLevel']);
+    Route::get('/vocabs', [ReviewController::class,'showVocab']);
+    Route::get('/lately-review-sets', [ReviewController::class,'latelyReviewSets']);
+});
+
+Route::group(['prefix' => 'friend'], function ($router) {
+    Route::post('/findByPhoneOrEmail', [FriendController::class,'findByPhoneOrEmail']);
+    Route::post('/addFriendRequest', [FriendController::class,'addFriendRequest']);
+    Route::post('/deleteFriendRequest', [FriendController::class,'deleteFriendRequest']);
+    Route::post('/updateFriendStatus', [FriendController::class,'updateFriendStatus']);
+    Route::post('/', [FriendController::class,'show']);
+});
+
+Route::group(['prefix' => 'users'], function ($router) {
+    Route::post('/', [UserController::class,'index']);
+    Route::post('/findByEmailOrPhone', [UserController::class,'findByEmailOrPhone']);
+    Route::post('/delete', [UserController::class,'delete']);
+});

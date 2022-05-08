@@ -28,14 +28,14 @@ class DefaultTopicsController extends Controller
             return response()->json([
                 'success' => true,
                 'messeage' => 'Không có dữ liệu'
-            ], 200);
+            ]);
         }
         return response()->json([
             'success' => true,
             'data' => [
                 'topics' => $default_topics,
             ],
-        ], 200);
+        ]);
 
     }
 
@@ -43,7 +43,7 @@ class DefaultTopicsController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
@@ -78,22 +78,27 @@ class DefaultTopicsController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        //
-        $id = $request->get('default_topics_id');
+        $id = $request->get('id');
+        if (empty($id)){
+            return response()->json([
+                'success' => false,
+                'message' => 'Bạn cần nhập vào id'
+            ]);
+        }
         $isUpdate = DB::table('default_topics')->where('id',$id)->update($request->all());
-        if($isUpdate){
+        if ($isUpdate){
             return response()->json([
                 'success' => true,
                 'message' => 'Cập nhật hành công'
             ], 200);
         }
         return response()->json([
-            'success' => true,
+            'success' => false,
             'message' => 'Không thành công'
         ], 200);
     }
@@ -102,7 +107,7 @@ class DefaultTopicsController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function delete(Request $request)
     {
@@ -131,5 +136,31 @@ class DefaultTopicsController extends Controller
                 'message' => 'Xóa chủ đề không thành công!'
             ]);
         }
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function showTopicById($id)
+    {
+        if(empty($id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bạn phải nhập id của chủ đề!'
+            ]);
+        }
+        $topic = DB::table('default_topics')->where('id', $id)->get()->toArray();
+        if (empty($topic)) {
+            return response()->json([
+                'success' => false,
+                'messeage' => 'Không có dữ liệu'
+            ]);
+        }
+        return response()->json([
+            'success' => true,
+            'topic' => $topic
+        ]);
     }
 }
