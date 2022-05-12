@@ -20,25 +20,42 @@ class VocabulariesController extends Controller
                 'message' => 'Bạn phải nhập id của bộ từ!'
             ]);
         }
-        $vocabularies = DB::table('vocabularies')->where('vocabulary_set_id', $set_id)->join('related_question', 'vocabularies.id', '=', 'related_question.vocabulary_id')->select('vocabularies.*', 'related_question.question')->get();
+        $created_id = DB::table('vocabulary_sets')->where('id', $set_id)->get('created_user_id')->toArray();
+        $id = $created_id[0]->created_user_id;
+        $role = DB::table('users')->where('id', $id)->get('role')->toArray();
+        $user_role = $role[0]->role;
+        if ($user_role === 'admin') {
+            $vocabularies = DB::table('vocabularies')->where('vocabulary_set_id', $set_id)->join('related_question', 'vocabularies.id', '=', 'related_question.vocabulary_id')->select('vocabularies.*', 'related_question.question')->get();
+        } else {
+            $vocabularies = DB::table('vocabularies')->where('vocabulary_set_id', $set_id)->get();
+        }
         if (empty($vocabularies)) {
             return response()->json([
                 'success' => false,
                 'messeage' => 'Không có dữ liệu'
             ]);
         }
-        $newVocabList = [];
-        foreach ($vocabularies->toArray() as $vocab) {
-            $dot = str_repeat('_ ', strlen($vocab->word));
-            $vocab->test = str_replace($vocab->word, $dot, $vocab->question);
-            array_push($newVocabList, $vocab);
+        if ($user_role === 'admin') {
+            $newVocabList = [];
+            foreach ($vocabularies->toArray() as $vocab) {
+                $dot = str_repeat('_ ', strlen($vocab->word));
+                $vocab->test = str_replace($vocab->word, $dot, $vocab->question);
+                array_push($newVocabList, $vocab);
+            }
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'vocabularies' => $newVocabList
+                ],
+            ]);
+        } else {
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'vocabularies' => $vocabularies
+                ],
+            ]);
         }
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'vocabularies' => $newVocabList
-            ],
-        ], 200);
     }
 
     /**
@@ -57,17 +74,29 @@ class VocabulariesController extends Controller
         ]);
         $listWords = $request->input('added_vocabularies');
         foreach ($listWords as $word){
-            $vocabularies_id = DB::table('vocabularies')->insertGetId([
-                'word' => $word['word'],
-                'definition' => $word['definition'],
-                'definition_image' => $word['definition_image'],
-                "def_lang" => $request->input('def_lang'),
-                "phonetic" => $word['phonetic'],
-                "audio" => $word['audio'],
-                "word_lang" => $request->input('word_lang'),
-                'vocabulary_set_id' => $request->input('vocabulary_set_id'),
-                'created_user_id' => $request->input('created_user_id'),
-            ]);
+            if (is_null($word['phonetic']) && is_null($word['audio'])) {
+                $vocabularies_id = DB::table('vocabularies')->insertGetId([
+                    'word' => $word['word'],
+                    'definition' => $word['definition'],
+                    'definition_image' => $word['definition_image'],
+                    "def_lang" => $request->input('def_lang'),
+                    "word_lang" => $request->input('word_lang'),
+                    'vocabulary_set_id' => $request->input('vocabulary_set_id'),
+                    'created_user_id' => $request->input('created_user_id'),
+                ]);
+            } else {
+                $vocabularies_id = DB::table('vocabularies')->insertGetId([
+                    'word' => $word['word'],
+                    'definition' => $word['definition'],
+                    'definition_image' => $word['definition_image'],
+                    "def_lang" => $request->input('def_lang'),
+                    "phonetic" => $word['phonetic'],
+                    "audio" => $word['audio'],
+                    "word_lang" => $request->input('word_lang'),
+                    'vocabulary_set_id' => $request->input('vocabulary_set_id'),
+                    'created_user_id' => $request->input('created_user_id'),
+                ]);
+            }
         }
 
         if (empty($vocabularies_id)) {
@@ -158,7 +187,7 @@ class VocabulariesController extends Controller
         ]);
 
         $vocab_id = $request->get('vocab_id');
-
+        $user_id = $request->get('user_id');
         if (is_null($vocab_id)) {
             return response()->json([
                 'success' => false,
@@ -166,7 +195,7 @@ class VocabulariesController extends Controller
             ]);
         }
 
-        $result =  DB::table('learning_results')->where('vocabulary_id',$vocab_id)->get()->toArray();
+        $result =  DB::table('learning_results')->where('vocabulary_id',$vocab_id)->where('user_id', $user_id)->get()->toArray();
         if (empty($result)) {
             $addedResult = DB::table('learning_results')->insertGetId([
                 'vocabulary_id' => $request->get('vocab_id'),
@@ -185,7 +214,7 @@ class VocabulariesController extends Controller
                 'message' => 'Ôn tập thành công!'
             ]);
         } else {
-            $f_measure = DB::table('learning_results')->where('vocabulary_id',$vocab_id)->select('f_rate')->get()->toArray();
+            $f_measure = DB::table('learning_results')->where('vocabulary_id',$vocab_id)->where('user_id', $user_id)->select('f_rate')->get()->toArray();
             $added_rate = $request->get('answer') . $f_measure[0]->f_rate;
             if ($added_rate[3] or $added_rate[4]) {
                 $new_rate = substr($added_rate, 0, 3). "1";
